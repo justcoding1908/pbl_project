@@ -1,4 +1,4 @@
-# 🧠 Fake News Detection using Machine Learning & Sentiment Intelligence
+# 🧠 Fake News Detection using Machine Learning & Sentiment Analysis
 
 <div align="center">
 
@@ -84,7 +84,7 @@ Each model is evaluated using:
 - 🔹 ROC Curve (AUC)  
 - 🔹 Precision-Recall Curve  
 
-Additionally, a **Sentiment Intelligence Layer** provides:
+Additionally, a **Sentiment Analysis Layer** provides:
 
 - Average VADER Compound Sentiment Score  
 - Average sentiment for predictions labeled Fake  
@@ -101,7 +101,7 @@ This enables direct inclusion into research papers or comparative studies.
 
 ---
 
-# 💬 Sentiment Intelligence Layer
+# 💬 Sentiment Analysis Layer
 
 We integrate **VADER (Valence Aware Dictionary for Sentiment Reasoning)** to analyze the emotional polarity of news content.
 
@@ -117,7 +117,7 @@ This allows us to analyze:
 
 > Do fake news articles exhibit stronger emotional polarity than real news?
 
-This hybrid architecture makes the system not just predictive — but analytical.
+This hybrid architecture makes the system not just predictive, but analytical.
 
 ---
 
