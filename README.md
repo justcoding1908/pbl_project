@@ -12,7 +12,7 @@
 
 In the age of digital misinformation, detecting fake news is no longer optional — it is essential.
 
-This project presents a **comprehensive, result-driven comparative analysis** of six Machine Learning models for Fake News Detection, enhanced with real-time web scraping and sentiment intelligence.
+This project presents a **comprehensive, result-driven comparative analysis** of six Machine Learning models for Fake News Detection, enhanced with real-time web scraping and sentiment Analysis.
 
 It is designed not just as a classification system, but as a **research-ready analytical framework** for evaluating model performance, computational trade-offs, and emotional polarity patterns in misinformation.
 
