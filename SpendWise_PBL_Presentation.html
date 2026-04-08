@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpendWise – PBL Presentation | 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,800;1,400&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --teal: #0e7c86;
+            --teal2: #14b8a6;
+            --navy: #0d1b2a;
+            --navy2: #102436;
+            --card: #0f2233;
+            --gold: #f59e0b;
+            --green: #22c55e;
+            --purple: #7c3aed;
+            --red: #ef4444;
+            --slate: #94a3b8;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #020b14;
+            color: #f1f5f9;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
+
+        /* ── Noise texture overlay ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0; opacity: 0.4;
+        }
+
+        /* ── Glass card ── */
+        .glass {
+            background: rgba(14, 36, 54, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(20, 184, 166, 0.12);
+        }
+
+        .glass-strong {
+            background: rgba(15, 34, 51, 0.85);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(20, 184, 166, 0.2);
+        }
+
+        /* ── Gradient text ── */
+        .gradient-text {
+            background: linear-gradient(135deg, #14b8a6, #3b82f6, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .teal-text { color: var(--teal2); }
+
+        /* ── Section header ── */
+        .section-header {
+            font-size: clamp(1.6rem, 4vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
+        }
+
+        /* ── Teal accent bar left ── */
+        .accent-left {
+            border-left: 4px solid var(--teal2);
+        }
+
+        /* ── Timer ── */
+        #timerContainer {
+            background: #ffffff;
+            color: #020617;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            border: 3px solid #3b82f6;
+            z-index: 1000;
+        }
+        @keyframes flicker { 0%,100%{background:#fff} 50%{background:#fca5a5} }
+        .timer-warning { animation: flicker 1s infinite; border-color: #ef4444 !important; color: #b91c1c !important; }
+        .timer-stop { background:#991b1b !important; color:#fff !important; border-color:#f87171 !important; animation:none; }
+
+        /* ── Stat card ── */
+        .stat-card {
+            background: var(--card);
+            border: 1px solid rgba(20,184,166,0.15);
+            border-top: 3px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.4); }
+
+        /* ── Literature Table ── */
+        .lit-table { border-collapse: collapse; width: 100%; }
+        .lit-table th {
+            background: var(--teal);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 14px 16px;
+            text-align: left;
+        }
+        .lit-table td {
+            padding: 13px 16px;
+            font-size: 12.5px;
+            vertical-align: top;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            line-height: 1.5;
+        }
+        .lit-table tr:nth-child(odd) td  { background: rgba(15,34,51,0.8); }
+        .lit-table tr:nth-child(even) td { background: rgba(8,26,39,0.8); }
+        .lit-table tr:hover td { background: rgba(14,124,134,0.12); }
+        .lit-table td:first-child { color: var(--teal2); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+        .lit-table td:nth-child(3) { color: #c4b5fd; }
+        .lit-table .key-finding { color: var(--slate); font-style: italic; }
+
+        /* ── Tag pill ── */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* ── Gap card ── */
+        .gap-card {
+            border-left: 3px solid;
+            padding: 16px 20px;
+            border-radius: 0 12px 12px 0;
+            transition: transform 0.2s;
+        }
+        .gap-card:hover { transform: translateX(4px); }
+
+        /* ── Contribution card ── */
+        .contrib-card {
+            background: rgba(14,124,134,0.08);
+            border: 1px solid rgba(20,184,166,0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex; gap: 14px; align-items: flex-start;
+            transition: background 0.2s;
+        }
+        .contrib-card:hover { background: rgba(14,124,134,0.15); }
+
+        /* ── SVG Flowchart ── */
+        .flowchart-container { overflow-x: auto; }
+        .flowchart-container svg { max-width: 100%; }
+
+        /* ── Methodology step ── */
+        .meth-step {
+            background: var(--card);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 24px;
+            border-top: 3px solid;
+            transition: transform 0.2s;
+        }
+        .meth-step:hover { transform: translateY(-4px); }
+
+        /* ── Nav link ── */
+        nav a { transition: color 0.2s; }
+        nav a:hover { color: var(--teal2); }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .fade-up { animation: fadeUp 0.7s ease both; }
+        .fade-up-2 { animation: fadeUp 0.7s 0.15s ease both; }
+        .fade-up-3 { animation: fadeUp 0.7s 0.3s ease both; }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #020b14; }
+        ::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
+
+        /* ── Divider ── */
+        .teal-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--teal2), transparent);
+            opacity: 0.3;
+            margin: 0 auto;
+        }
+
+        /* ── Tech badge ── */
+        .tech-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 5px 12px;
+            background: rgba(20,184,166,0.08);
+            border: 1px solid rgba(20,184,166,0.25);
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--teal2);
+            font-weight: 700;
+        }
+
+        /* ── Glow ── */
+        .teal-glow { box-shadow: 0 0 32px rgba(14,124,134,0.25); }
+    </style>
+</head>
+<body onload="startTimer()">
+
+<!-- ══ TIMER ══════════════════════════════════════════════════════ -->
+<div id="timerContainer" class="fixed bottom-8 right-8 px-7 py-3 rounded-3xl flex items-center gap-4 transition-all">
+    <i class="fas fa-hourglass-start text-blue-600 text-xl" id="timerIcon"></i>
+    <span id="displayTime" class="text-3xl font-black font-mono tracking-tighter">00:00</span>
+</div>
+
+<!-- ══ NAV ═════════════════════════════════════════════════════════ -->
+<nav class="fixed w-full z-50 glass-strong border-b border-teal-900/30 px-8 py-4 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+        <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--teal);">
+            <i class="fas fa-wallet text-white text-base"></i>
+        </div>
+        <div>
+            <div class="text-base font-black text-white uppercase tracking-tight leading-none">PBL <span style="color:var(--teal2)" class="italic">2026</span></div>
+            <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Dept. of Computer Science & Engineering · MUJ</div>
+        </div>
+    </div>
+    <div class="hidden md:flex gap-8 text-[11px] uppercase tracking-widest font-bold text-slate-400">
+        <a href="#intro">Intro</a>
+        <a href="#litreview">Literature</a>
+        <a href="#gaps">Gaps</a>
+        <a href="#problem">Problem</a>
+        <a href="#objectives">Objectives</a>
+        <a href="#methodology">Methodology</a>
+        <a href="#team">Team</a>
+    </div>
+</nav>
+
+<main class="relative z-10 max-w-6xl mx-auto px-6 pt-44 pb-32 space-y-36">
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 1 — HERO / TITLE
+══════════════════════════════════════════════════════════════════ -->
+<section class="text-center fade-up">
+    <div class="inline-block px-4 py-1.5 border border-teal-800/50 rounded-full text-[10px] font-mono mb-6 uppercase tracking-widest text-teal-400 mb-8">
+        23FE10CSE00480 · B.Tech CSE · MUJ '27
+    </div>
+
+    <h1 class="text-6xl md:text-8xl font-black mb-6 leading-none tracking-tight uppercase">
+        <span class="gradient-text">SpendWise</span>
+    </h1>
+    <p class="text-slate-300 text-xl md:text-2xl font-semibold mb-10 tracking-wide">AI-Powered UPI Expense Tracker</p>
+
+    <div class="max-w-3xl mx-auto glass rounded-3xl p-8 accent-left text-left fade-up-2">
+        <p class="text-[10px] font-bold uppercase tracking-widest text-teal-400 mb-3">Hypothesis / Project Statement</p>
+        <p class="text-slate-300 italic text-base leading-relaxed">
+            "Integrating a multi-model AI pipeline — comprising LLM-based financial coaching, Vision-LLM OCR receipt scanning, and zero-shot explainable vendor classification — with regex-based SBI SMS parsing into a production-deployed full-stack web application can deliver a practical, intelligent, and privacy-preserving personal finance management solution for Indian college students."
+        </p>
+    </div>
+
+    <!-- Tech Stack pills -->
+    <div class="flex flex-wrap justify-center gap-2 mt-10 fade-up-3">
+        <span class="tech-badge"><i class="fab fa-react text-xs"></i> React.js</span>
+        <span class="tech-badge"><i class="fab fa-node-js text-xs"></i> Node.js</span>
+        <span class="tech-badge">Express.js</span>
+        <span class="tech-badge">Supabase</span>
+        <span class="tech-badge">Groq API</span>
+        <span class="tech-badge">LLaMA 3.3</span>
+        <span class="tech-badge">LLaMA 4 Vision</span>
+        <span class="tech-badge">JWT</span>
+        <span class="tech-badge">Recharts</span>
+        <span class="tech-badge">Vercel · Render</span>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 2 — OUTLINE
+══════════════════════════════════════════════════════════════════ -->
+<section>
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 text-center mb-4">Presentation Structure</p>
+    <h2 class="section-header text-center mb-12">Outline</h2>
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-5">
+        <!--items-->
+        <div class="glass rounded-2xl p-6 flex gap-4 items-start">
+            <span class="text-2xl font-black font-mono" style="color:var(--teal2)">01</span>
+            <div><div class="font-bold text-sm text-white">Introduction</div><div class="text-xs text-slate-400 mt-1">Motivation & context</div></div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-4 items-start">
+            <span class="text-2xl font-black font-mono" style="color:var(--gold)">02</span>
+            <div><div class="font-bold text-sm text-white">Literature Review</div><div class="text-xs text-slate-400 mt-1">8 papers, table format</div></div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-4 items-start">
+            <span class="text-2xl font-black font-mono" style="color:var(--green)">03</span>
+            <div><div class="font-bold text-sm text-white">Research Gaps</div><div class="text-xs text-slate-400 mt-1">Gaps found & addressed</div></div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-4 items-start">
+            <span class="text-2xl font-black font-mono" style="color:var(--purple)">04</span>
+            <div><div class="font-bold text-sm text-white">Problem Statement</div><div class="text-xs text-slate-400 mt-1">Core question defined</div></div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-4 items-start">
+            <span class="text-2xl font-black font-mono" style="color:var(--red)">05</span>
+            <div><div class="font-bold text-sm text-white">Objectives</div><div class="text-xs text-slate-400 mt-1">5 specific goals</div></div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-4 items-start">
+            <span class="text-2xl font-black font-mono" style="color:var(--teal2)">06</span>
+            <div><div class="font-bold text-sm text-white">Methodology</div><div class="text-xs text-slate-400 mt-1">AI pipeline flowchart</div></div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 3 — INTRODUCTION
+══════════════════════════════════════════════════════════════════ -->
+<section id="intro">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">Section 01</p>
+    <h2 class="section-header mb-12">Introduction</h2>
+
+    <div class="grid md:grid-cols-2 gap-10 items-start">
+        <!-- Left: bullet points -->
+        <div class="glass rounded-3xl p-8 accent-left space-y-6">
+            <div class="flex gap-4 items-start">
+                <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-base" style="background:rgba(245,158,11,0.15); color:var(--gold)">⚠</div>
+                <p class="text-slate-300 text-sm leading-relaxed">India processed over <strong class="text-white">100 billion UPI transactions</strong> in 2023 — the world's largest real-time digital payment ecosystem (NPCI, 2024) — yet students have zero visibility into their own spending.</p>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-base" style="background:rgba(20,184,166,0.15); color:var(--teal2)">📱</div>
+                <p class="text-slate-300 text-sm leading-relaxed">SBI sends millions of SMS transaction alerts daily — <strong class="text-white">unstructured, unanalyzed data</strong> sitting unused in inboxes, never aggregated into insights.</p>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-base" style="background:rgba(34,197,94,0.15); color:var(--green)">🤖</div>
+                <p class="text-slate-300 text-sm leading-relaxed">Large Language Models now enable <strong class="text-white">context-aware financial coaching, Vision OCR receipt scanning, and zero-shot vendor classification</strong> — capabilities no existing student finance app uses.</p>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-base" style="background:rgba(124,58,237,0.15); color:var(--purple)">📊</div>
+                <p class="text-slate-300 text-sm leading-relaxed">Existing apps (Walnut, CRED, MoneyView) require full <strong class="text-white">bank account linkage</strong>, raising privacy concerns. Manual tracking is tedious — students abandon it within weeks.</p>
+            </div>
+            <div class="flex gap-4 items-start">
+                <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-base" style="background:rgba(239,68,68,0.15); color:var(--red)">🔍</div>
+                <p class="text-slate-300 text-sm leading-relaxed"><strong class="text-white">SpendWise</strong> requires <em>zero bank linkage</em> — users paste SBI SMS or upload receipts. AI handles the rest: parsing, categorization, coaching, forecasting.</p>
+            </div>
+        </div>
+
+        <!-- Right: stat cards -->
+        <div class="grid grid-cols-2 gap-4">
+            <div class="stat-card rounded-2xl p-6 text-center" style="border-top-color:var(--teal)">
+                <div class="text-4xl font-black font-mono mb-2" style="color:var(--teal2)">300M+</div>
+                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">UPI Users in India</div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center" style="border-top-color:var(--gold)">
+                <div class="text-4xl font-black font-mono mb-2" style="color:var(--gold)">₹200T+</div>
+                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Annual UPI Volume</div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center" style="border-top-color:var(--green)">
+                <div class="text-4xl font-black font-mono mb-2" style="color:var(--green)">72%</div>
+                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">Students lack budgeting tools</div>
+            </div>
+            <div class="stat-card rounded-2xl p-6 text-center" style="border-top-color:var(--purple)">
+                <div class="text-4xl font-black font-mono mb-2" style="color:var(--purple)">4</div>
+                <div class="text-xs text-slate-400 uppercase tracking-widest font-bold">AI Models Integrated</div>
+            </div>
+            <div class="stat-card col-span-2 rounded-2xl p-6" style="border-top-color:var(--teal2)">
+                <div class="text-xs font-bold uppercase tracking-widest mb-3" style="color:var(--teal2)">SpendWise Differentiators</div>
+                <div class="space-y-2">
+                    <div class="flex items-center gap-2 text-sm text-slate-300"><i class="fas fa-check-circle text-xs" style="color:var(--teal2)"></i> Zero bank account linkage required</div>
+                    <div class="flex items-center gap-2 text-sm text-slate-300"><i class="fas fa-check-circle text-xs" style="color:var(--teal2)"></i> Multi-format SBI SMS regex parsing</div>
+                    <div class="flex items-center gap-2 text-sm text-slate-300"><i class="fas fa-check-circle text-xs" style="color:var(--teal2)"></i> XAI reasoning shown to the user</div>
+                    <div class="flex items-center gap-2 text-sm text-slate-300"><i class="fas fa-check-circle text-xs" style="color:var(--teal2)"></i> Production-deployed on Vercel + Render</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 4 — LITERATURE REVIEW
+══════════════════════════════════════════════════════════════════ -->
+<section id="litreview">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">Section 02</p>
+    <h2 class="section-header mb-3">Literature Review</h2>
+    <p class="text-slate-400 text-sm mb-10 max-w-2xl">Research papers surveyed on UPI expense tracking, AI-powered personal finance, and LLM-based financial advisory systems (2020 onwards).</p>
+
+    <!-- Table -->
+    <div class="glass rounded-3xl overflow-hidden teal-glow">
+        <div class="overflow-x-auto">
+            <table class="lit-table">
+                <thead>
+                    <tr>
+                        <th style="width:42px">S.No.</th>
+                        <th>Citation</th>
+                        <th style="width:52px">Year</th>
+                        <th>Technique(s)</th>
+                        <th>Dataset(s)</th>
+                        <th>Key Finding</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>01</td>
+                        <td><strong class="text-white">Thakare et al.</strong><br><span class="text-[10px] text-slate-500">IJRES</span></td>
+                        <td><span class="tag" style="background:rgba(20,184,166,0.1);color:var(--teal2)">2023</span></td>
+                        <td>Naïve Bayes + Android SMS parsing</td>
+                        <td>Custom Indian bank SMS</td>
+                        <td class="key-finding">Automatic SMS-based expense categorization on Android; no web interface, no AI advisory layer or LLM integration</td>
+                    </tr>
+                    <tr>
+                        <td>02</td>
+                        <td><strong class="text-white">Johri et al.</strong><br><span class="text-[10px] text-slate-500">IEEE GCAT</span></td>
+                        <td><span class="tag" style="background:rgba(20,184,166,0.1);color:var(--teal2)">2023</span></td>
+                        <td>SMS scraping + ML categorization + de-duplication</td>
+                        <td>SBI / HDFC SMS templates</td>
+                        <td class="key-finding">Automated transaction ingestion via SMS with de-duplication logic; no deployment, no LLM or Vision AI integration</td>
+                    </tr>
+                    <tr>
+                        <td>03</td>
+                        <td><strong class="text-white">Singla et al.</strong><br><span class="text-[10px] text-slate-500">INNOCOMP</span></td>
+                        <td><span class="tag" style="background:rgba(245,158,11,0.1);color:var(--gold)">2024</span></td>
+                        <td>Dashboard + AES encryption + UX design</td>
+                        <td>User-generated transactions</td>
+                        <td class="key-finding">Usability-first daily expense tracker with secure storage; no AI coaching, no forecasting, no SMS parsing</td>
+                    </tr>
+                    <tr>
+                        <td>04</td>
+                        <td><strong class="text-white">Aishwarya &amp; Hemalatha</strong><br><span class="text-[10px] text-slate-500">AI4IoT</span></td>
+                        <td><span class="tag" style="background:rgba(20,184,166,0.1);color:var(--teal2)">2023</span></td>
+                        <td>ML-based expense classification</td>
+                        <td>IoT + mobile transaction data</td>
+                        <td class="key-finding">Smart tracking with ML categorization; lacks UPI-specific parsing and explainable LLM-powered advisory</td>
+                    </tr>
+                    <tr>
+                        <td>05</td>
+                        <td><strong class="text-white">Bandara &amp; Nawinna</strong><br><span class="text-[10px] text-slate-500">ResearchGate (WONGA)</span></td>
+                        <td><span class="tag" style="background:rgba(20,184,166,0.1);color:var(--teal2)">2023</span></td>
+                        <td>ML predictive analytics + expense tracking</td>
+                        <td>Personal finance logs</td>
+                        <td class="key-finding">ML-driven spend prediction and tracking; no Indian UPI context, no LLM or Vision AI, no XAI reasoning</td>
+                    </tr>
+                    <tr>
+                        <td>06</td>
+                        <td><strong class="text-white">de Zarzà et al.</strong><br><span class="text-[10px] text-slate-500">AI (MDPI)</span></td>
+                        <td><span class="tag" style="background:rgba(245,158,11,0.1);color:var(--gold)">2024</span></td>
+                        <td>LLM-based financial planning + cooperative budgeting optimization</td>
+                        <td>Individual / household budgets</td>
+                        <td class="key-finding">LLMs used for personalized budgeting recommendations; no SMS parsing, no receipt scanning, no Indian student context</td>
+                    </tr>
+                    <tr>
+                        <td>07</td>
+                        <td><strong class="text-white">Dev et al.</strong><br><span class="text-[10px] text-slate-500">CHI EA, ACM</span></td>
+                        <td><span class="tag" style="background:rgba(245,158,11,0.1);color:var(--gold)">2024</span></td>
+                        <td>UPI behavior analysis + interface design</td>
+                        <td>150 Indian UPI users (survey)</td>
+                        <td class="key-finding">UPI users lack financial visibility; strong need for automated, contextual spend awareness tools — validates this project's premise</td>
+                    </tr>
+                    <tr>
+                        <td>08</td>
+                        <td><strong class="text-white">Talasila, S.D.</strong><br><span class="text-[10px] text-slate-500">IRJET</span></td>
+                        <td><span class="tag" style="background:rgba(245,158,11,0.1);color:var(--gold)">2024</span></td>
+                        <td>AI + NLP for personal finance management</td>
+                        <td>Multi-source financial records</td>
+                        <td class="key-finding">AI-driven finance management improves decision-making; lacks real-time SMS parsing pipeline and student-specific UPI context</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Outcomes of Literature Review -->
+    <div class="mt-14">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="h-px flex-1" style="background:rgba(20,184,166,0.2)"></div>
+            <span class="text-xs font-black uppercase tracking-widest" style="color:var(--teal2)">Outcomes of Literature Review</span>
+            <div class="h-px flex-1" style="background:rgba(20,184,166,0.2)"></div>
+        </div>
+        <div class="grid md:grid-cols-2 gap-5">
+            <div class="glass rounded-2xl p-6 flex gap-4">
+                <div class="text-2xl flex-shrink-0">💡</div>
+                <div>
+                    <div class="font-bold text-sm text-white mb-1">SMS Parsing is Proven but Incomplete</div>
+                    <div class="text-xs text-slate-400 leading-relaxed">Thakare (2023) and Johri (2023) confirm SMS-based parsing is a valid, privacy-respecting method for Indian users — but implementations remain Android-only and lack web deployability, AI coaching, or forecasting.</div>
+                </div>
+            </div>
+            <div class="glass rounded-2xl p-6 flex gap-4">
+                <div class="text-2xl flex-shrink-0">⚡</div>
+                <div>
+                    <div class="font-bold text-sm text-white mb-1">ML Categorization Fails on Unknown Vendors</div>
+                    <div class="text-xs text-slate-400 leading-relaxed">Classical ML works for known merchants but fails silently for unknown vendors. No existing work uses zero-shot LLM classification with XAI reasoning for this fallback — a critical unaddressed gap.</div>
+                </div>
+            </div>
+            <div class="glass rounded-2xl p-6 flex gap-4">
+                <div class="text-2xl flex-shrink-0">🔍</div>
+                <div>
+                    <div class="font-bold text-sm text-white mb-1">LLMs Show Promise But Lack Grounding</div>
+                    <div class="text-xs text-slate-400 leading-relaxed">de Zarzà et al. (2024) demonstrates LLMs as financial advisors — but with generic advice. No work grounds coaching in the user's actual historical UPI transaction data (context-augmented generation).</div>
+                </div>
+            </div>
+            <div class="glass rounded-2xl p-6 flex gap-4">
+                <div class="text-2xl flex-shrink-0">📊</div>
+                <div>
+                    <div class="font-bold text-sm text-white mb-1">Students Lack Financial Self-Awareness</div>
+                    <div class="text-xs text-slate-400 leading-relaxed">Dev et al. (2024) empirically confirms UPI users — especially students — have poor financial self-awareness despite heavy digital payment usage, yet no tool addresses this in an account-linkage-free manner.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 5 — GAPS + CONTRIBUTIONS
+══════════════════════════════════════════════════════════════════ -->
+<section id="gaps">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">Section 03</p>
+    <h2 class="section-header mb-3">Research Gaps &amp; Contributions</h2>
+    <p class="text-slate-400 text-sm mb-12 max-w-2xl">Gaps identified in the literature review and how SpendWise directly addresses each one.</p>
+
+    <div class="grid md:grid-cols-2 gap-10">
+        <!-- Left: Gaps -->
+        <div>
+            <div class="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full inline-block" style="background:var(--red)"></span>
+                <span class="text-red-400">Gaps Found in Literature</span>
+            </div>
+            <div class="space-y-4">
+                <div class="gap-card" style="border-color:var(--red); background:rgba(239,68,68,0.05)">
+                    <div class="font-bold text-sm text-white mb-1">1. Web-Based UPI Tracker Missing</div>
+                    <div class="text-xs text-slate-400">All prior SMS-parsing work is Android-only. No web-based, production-deployed UPI tracker exists in academic literature.</div>
+                </div>
+                <div class="gap-card" style="border-color:var(--gold); background:rgba(245,158,11,0.05)">
+                    <div class="font-bold text-sm text-white mb-1">2. No LLM Integration for Vendor Classification</div>
+                    <div class="text-xs text-slate-400">Existing tools use keyword rules or classical ML. No prior work uses zero-shot LLM classification with confidence score and XAI reasoning for unknown vendors.</div>
+                </div>
+                <div class="gap-card" style="border-color:var(--purple); background:rgba(124,58,237,0.05)">
+                    <div class="font-bold text-sm text-white mb-1">3. No Contextual AI Financial Coaching</div>
+                    <div class="text-xs text-slate-400">Prior AI finance tools give generic advice. No system grounds coaching in the user's actual historical UPI spending data via context-augmented generation.</div>
+                </div>
+                <div class="gap-card" style="border-color:var(--teal); background:rgba(14,124,134,0.05)">
+                    <div class="font-bold text-sm text-white mb-1">4. Receipt OCR Not Combined with SMS Pipeline</div>
+                    <div class="text-xs text-slate-400">Receipt scanning and SMS parsing exist independently in literature; no system combines both input modalities into one unified tracker dashboard.</div>
+                </div>
+                <div class="gap-card" style="border-color:var(--green); background:rgba(34,197,94,0.05)">
+                    <div class="font-bold text-sm text-white mb-1">5. No Spend Forecasting for Indian UPI Students</div>
+                    <div class="text-xs text-slate-400">General ML forecasting exists (WONGA, 2023) but no work applies Weighted Moving Average forecasting specifically to Indian UPI student spending patterns.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Contributions -->
+        <div>
+            <div class="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full inline-block" style="background:var(--teal2)"></span>
+                <span style="color:var(--teal2)">How SpendWise Addresses Them</span>
+            </div>
+            <div class="space-y-4">
+                <div class="contrib-card">
+                    <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black" style="background:var(--teal); color:white">✓</div>
+                    <div>
+                        <div class="font-bold text-sm text-white mb-1">Full-Stack Web Deployment</div>
+                        <div class="text-xs text-slate-400">Production-deployed on Vercel (frontend) + Render (backend) + Supabase PostgreSQL — works on any device with zero app install.</div>
+                    </div>
+                </div>
+                <div class="contrib-card">
+                    <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black" style="background:var(--teal); color:white">✓</div>
+                    <div>
+                        <div class="font-bold text-sm text-white mb-1">Zero-Shot XAI Vendor Classifier</div>
+                        <div class="text-xs text-slate-400">Groq LLaMA 3.3 classifies unknown vendors with confidence % + explainable reasoning displayed to the user. localStorage memory persists results.</div>
+                    </div>
+                </div>
+                <div class="contrib-card">
+                    <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black" style="background:var(--teal); color:white">✓</div>
+                    <div>
+                        <div class="font-bold text-sm text-white mb-1">Context-Augmented AI Coach</div>
+                        <div class="text-xs text-slate-400">LLaMA 3.3 receives the user's actual category-wise totals and transaction count — generating grounded, personalized financial insights, not generic tips.</div>
+                    </div>
+                </div>
+                <div class="contrib-card">
+                    <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black" style="background:var(--teal); color:white">✓</div>
+                    <div>
+                        <div class="font-bold text-sm text-white mb-1">Unified SMS + Receipt Pipeline</div>
+                        <div class="text-xs text-slate-400">LLaMA 4 Scout Vision OCR extracts vendor, amount, date, and category from photos — combined in the same dashboard as SMS parser, single unified tracker.</div>
+                    </div>
+                </div>
+                <div class="contrib-card">
+                    <div class="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-black" style="background:var(--teal); color:white">✓</div>
+                    <div>
+                        <div class="font-bold text-sm text-white mb-1">WMA Forecast + Verdict System</div>
+                        <div class="text-xs text-slate-400">Weighted Moving Average projects month-end spending with 🟢 On Track / 🟡 Careful / 🔴 High Spend verdict — lightweight, explainable, student-specific.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 glass rounded-2xl p-5 border-l-4" style="border-color:var(--teal2)">
+                <p class="text-sm text-slate-300 italic leading-relaxed">"SpendWise bridges the gap between automated UPI data collection and intelligent, explainable financial feedback — specifically designed for Indian college students."</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 6 — PROBLEM STATEMENT
+══════════════════════════════════════════════════════════════════ -->
+<section id="problem">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">Section 04</p>
+    <h2 class="section-header mb-10">Problem Statement</h2>
+
+    <div class="glass rounded-3xl p-10 accent-left teal-glow">
+        <p class="text-lg md:text-xl text-slate-200 italic leading-relaxed font-medium">
+            "To design, develop, and deploy a full-stack AI-augmented web application that automates UPI expense tracking for Indian college students through <span class="text-white font-bold not-italic">regex-based SBI SMS parsing</span>, <span class="text-white font-bold not-italic">LLM-powered zero-shot vendor categorization with explainability</span>, <span class="text-white font-bold not-italic">Vision AI receipt scanning</span>, and <span class="text-white font-bold not-italic">Weighted Moving Average spend forecasting</span> — without requiring bank account linkage — thereby addressing critical gaps in accessibility, interpretability, and financial self-awareness identified in existing tools and academic literature."
+        </p>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+        <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl mb-2">🎯</div>
+            <div class="text-xs font-bold uppercase tracking-widest" style="color:var(--teal2)">Automation</div>
+            <div class="text-xs text-slate-400 mt-1">Zero manual entry via SMS + OCR</div>
+        </div>
+        <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl mb-2">🧠</div>
+            <div class="text-xs font-bold uppercase tracking-widest" style="color:var(--gold)">AI Intelligence</div>
+            <div class="text-xs text-slate-400 mt-1">Multi-model LLM pipeline</div>
+        </div>
+        <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl mb-2">🔍</div>
+            <div class="text-xs font-bold uppercase tracking-widest" style="color:var(--green)">Explainability</div>
+            <div class="text-xs text-slate-400 mt-1">XAI reasoning shown to users</div>
+        </div>
+        <div class="glass rounded-2xl p-5 text-center">
+            <div class="text-2xl mb-2">🚀</div>
+            <div class="text-xs font-bold uppercase tracking-widest" style="color:var(--purple)">Deployment</div>
+            <div class="text-xs text-slate-400 mt-1">Production-ready on Vercel + Render</div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 7 — OBJECTIVES
+══════════════════════════════════════════════════════════════════ -->
+<section id="objectives">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">Section 05</p>
+    <h2 class="section-header mb-10">Objectives</h2>
+
+    <div class="space-y-4">
+        <div class="glass rounded-2xl p-6 flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm" style="background:var(--teal); color:white">O1</div>
+            <div>
+                <div class="font-bold text-white mb-1">SMS Transaction Parsing</div>
+                <div class="text-sm text-slate-400">To parse SBI UPI SMS notifications across <strong class="text-slate-200">2 distinct message formats</strong> using regex-based extraction and auto-categorize transactions into 10 spending categories using MERCHANT_MAP lookup and localStorage vendor memory.</div>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm" style="background:var(--gold); color:white">O2</div>
+            <div>
+                <div class="font-bold text-white mb-1">JWT Authentication + Secure RESTful API</div>
+                <div class="text-sm text-slate-400">To implement <strong class="text-slate-200">JWT authentication with Supabase Row-Level Security</strong> and a RESTful API covering transactions, budgets, and analytics endpoints with full CRUD and stats operations.</div>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm" style="background:var(--green); color:white">O3</div>
+            <div>
+                <div class="font-bold text-white mb-1">Context-Augmented LLM Financial Coaching</div>
+                <div class="text-sm text-slate-400">To integrate <strong class="text-slate-200">Groq LLaMA 3.3-70B</strong> with user's actual spending context (category totals, transaction count) to generate personalized 5-card financial insights with staggered reveal animations.</div>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm" style="background:var(--purple); color:white">O4</div>
+            <div>
+                <div class="font-bold text-white mb-1">Vision LLM Receipt Scanner + Zero-Shot XAI Categorizer</div>
+                <div class="text-sm text-slate-400">To deploy <strong class="text-slate-200">LLaMA 4 Scout Vision</strong> for OCR receipt scanning and zero-shot LLM classification for unknown vendors — both with user confirmation workflow and <strong class="text-slate-200">XAI reasoning</strong> displayed alongside confidence %.</div>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-6 flex gap-5 items-start">
+            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm" style="background:var(--red); color:white">O5</div>
+            <div>
+                <div class="font-bold text-white mb-1">Spend Forecasting + Analytics Dashboard</div>
+                <div class="text-sm text-slate-400">To implement a <strong class="text-slate-200">Weighted Moving Average forecast model</strong> with 🟢/🟡/🔴 verdict system, alongside Recharts-powered donut charts, weekly bar charts, dual-line forecast charts, and month-switcher analytics.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 8 — METHODOLOGY FLOWCHART
+══════════════════════════════════════════════════════════════════ -->
+<section id="methodology">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">Section 06</p>
+    <h2 class="section-header mb-3">Proposed Methodology</h2>
+    <p class="text-slate-400 text-sm mb-12 max-w-2xl">End-to-end system pipeline — from raw user input through AI processing to analytical output.</p>
+
+    <!-- ── SVG Flowchart ── -->
+    <div class="glass rounded-3xl p-6 md:p-10 teal-glow">
+        <div class="flowchart-container">
+            <svg viewBox="0 0 900 1080" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;display:block;margin:0 auto;font-family:'Plus Jakarta Sans',sans-serif;">
+                <defs>
+                    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke="#14b8a6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </marker>
+                    <marker id="arr-gold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </marker>
+                    <marker id="arr-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </marker>
+                    <marker id="arr-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M2 1L8 5L2 9" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </marker>
+                </defs>
+
+                <!-- ── ROW 1: USER INPUTS ── -->
+                <!-- SMS Input box -->
+                <rect x="60" y="30" width="220" height="64" rx="10" fill="#0f2233" stroke="#14b8a6" stroke-width="1.5"/>
+                <rect x="60" y="30" width="4" height="64" rx="2" fill="#14b8a6"/>
+                <text x="155" y="56" text-anchor="middle" fill="#14b8a6" font-size="10" font-weight="700" letter-spacing="1">USER INPUT A</text>
+                <text x="155" y="74" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Paste SBI UPI SMS</text>
+
+                <!-- Receipt Input box -->
+                <rect x="620" y="30" width="220" height="64" rx="10" fill="#0f2233" stroke="#f59e0b" stroke-width="1.5"/>
+                <rect x="836" y="30" width="4" height="64" rx="2" fill="#f59e0b"/>
+                <text x="730" y="56" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700" letter-spacing="1">USER INPUT B</text>
+                <text x="730" y="74" text-anchor="middle" fill="#e2e8f0" font-size="12" font-weight="600">Upload Receipt Photo</text>
+
+                <!-- Arrow: SMS → Regex -->
+                <line x1="170" y1="94" x2="170" y2="148" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr)"/>
+
+                <!-- Arrow: Receipt → Vision LLM -->
+                <line x1="730" y1="94" x2="730" y2="148" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arr-gold)"/>
+
+                <!-- ── ROW 2: PARSERS ── -->
+                <!-- Regex Parser -->
+                <rect x="60" y="148" width="220" height="76" rx="10" fill="#102030" stroke="#14b8a6" stroke-width="1.5"/>
+                <text x="170" y="172" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="1">STEP 1 · PARSING</text>
+                <text x="170" y="192" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Regex Parser</text>
+                <text x="170" y="212" text-anchor="middle" fill="#94a3b8" font-size="10">2 SBI UPI message formats</text>
+
+                <!-- Vision LLM -->
+                <rect x="620" y="148" width="220" height="76" rx="10" fill="#1a1020" stroke="#f59e0b" stroke-width="1.5"/>
+                <text x="730" y="172" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="1">STEP 1B · VISION</text>
+                <text x="730" y="192" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">LLaMA 4 Scout Vision</text>
+                <text x="730" y="212" text-anchor="middle" fill="#94a3b8" font-size="10">OCR → vendor, amount, date</text>
+
+                <!-- ── Arrow: Regex → Merchant Map ── -->
+                <line x1="170" y1="224" x2="170" y2="278" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr)"/>
+
+                <!-- Arrow: Vision → User Confirms (receipt path merges later) -->
+                <line x1="730" y1="224" x2="730" y2="370" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-gold)"/>
+
+                <!-- ── ROW 3: MERCHANT MAP ── -->
+                <rect x="60" y="278" width="220" height="76" rx="10" fill="#102030" stroke="#14b8a6" stroke-width="1.5"/>
+                <text x="170" y="302" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="1">STEP 2 · LOOKUP</text>
+                <text x="170" y="322" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Merchant Map Lookup</text>
+                <text x="170" y="342" text-anchor="middle" fill="#94a3b8" font-size="10">localStorage + MERCHANT_MAP</text>
+
+                <!-- ── Decision diamond ── -->
+                <line x1="170" y1="354" x2="170" y2="398" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr)"/>
+
+                <!-- Diamond shape -->
+                <polygon points="170,398 280,440 170,482 60,440" fill="#081a27" stroke="#14b8a6" stroke-width="1.5"/>
+                <text x="170" y="434" text-anchor="middle" fill="#14b8a6" font-size="12" font-weight="700">Known</text>
+                <text x="170" y="450" text-anchor="middle" fill="#14b8a6" font-size="12" font-weight="700">Vendor?</text>
+
+                <!-- YES branch → right (auto category) -->
+                <line x1="280" y1="440" x2="380" y2="440" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arr-green)"/>
+                <text x="320" y="433" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="700">YES</text>
+
+                <!-- NO branch → down (LLM zero-shot) -->
+                <line x1="170" y1="482" x2="170" y2="530" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arr)"/>
+                <text x="185" y="510" fill="#ef4444" font-size="10" font-weight="700">NO</text>
+
+                <!-- Auto-Category box (YES path) -->
+                <rect x="380" y="408" width="200" height="64" rx="10" fill="#0a2010" stroke="#22c55e" stroke-width="1.5"/>
+                <text x="480" y="432" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="700" letter-spacing="1">AUTO-ASSIGN</text>
+                <text x="480" y="452" text-anchor="middle" fill="#fff" font-size="12" font-weight="600">Category Assigned</text>
+                <text x="480" y="465" text-anchor="middle" fill="#94a3b8" font-size="9">Instant from memory</text>
+
+                <!-- Arrow: Auto → Save -->
+                <line x1="480" y1="472" x2="480" y2="530" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arr-green)"/>
+
+                <!-- LLM Zero-Shot box (NO path) -->
+                <rect x="60" y="530" width="220" height="76" rx="10" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.5"/>
+                <text x="170" y="554" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="1">STEP 3 · AI CLASSIFY</text>
+                <text x="170" y="574" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Groq LLaMA 3.3</text>
+                <text x="170" y="590" text-anchor="middle" fill="#a855f7" font-size="10">Zero-shot + Confidence % + XAI</text>
+
+                <!-- Arrow: LLM → User Confirms -->
+                <line x1="170" y1="606" x2="170" y2="654" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+
+                <!-- User Confirms box (all three paths merge here conceptually) -->
+                <rect x="60" y="654" width="220" height="64" rx="10" fill="#0a1a10" stroke="#22c55e" stroke-width="1.5"/>
+                <text x="170" y="678" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="1">STEP 4 · CONFIRM</text>
+                <text x="170" y="698" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">User Confirms Category</text>
+
+                <!-- Arrow from YES path merge -->
+                <path d="M480 530 L480 686 L282 686" fill="none" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-green)"/>
+
+                <!-- Arrow from Vision path merge -->
+                <path d="M730 370 L730 686 L282 686" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arr-gold)"/>
+
+                <!-- Arrow: Confirm → Save -->
+                <line x1="170" y1="718" x2="170" y2="766" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr)"/>
+
+                <!-- ── Save to Supabase ── -->
+                <rect x="60" y="766" width="220" height="76" rx="10" fill="#102030" stroke="#14b8a6" stroke-width="2"/>
+                <text x="170" y="790" text-anchor="middle" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="1">STEP 5 · SECURE STORE</text>
+                <text x="170" y="810" text-anchor="middle" fill="#fff" font-size="13" font-weight="700">Supabase PostgreSQL</text>
+                <text x="170" y="826" text-anchor="middle" fill="#14b8a6" font-size="10">JWT Auth · Row-Level Security</text>
+
+                <!-- Fan out to 4 outputs -->
+                <line x1="170" y1="842" x2="170" y2="878" stroke="#14b8a6" stroke-width="1.5"/>
+                <line x1="170" y1="878" x2="90" y2="878" stroke="#14b8a6" stroke-width="1.5"/>
+                <line x1="170" y1="878" x2="390" y2="878" stroke="#14b8a6" stroke-width="1.5"/>
+                <line x1="90" y1="878" x2="90" y2="912" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="250" y1="878" x2="250" y2="912" stroke="#14b8a6" stroke-width="1.5" marker-end="url(#arr)"/>
+                <line x1="390" y1="878" x2="390" y2="912" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arr-green)"/>
+                <line x1="530" y1="878" x2="530" y2="912" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arr-purple)"/>
+                <line x1="170" y1="878" x2="530" y2="878" stroke="#14b8a6" stroke-width="1.5"/>
+                <line x1="530" y1="878" x2="530" y2="878" stroke="#a855f7" stroke-width="1"/>
+
+                <!-- Output 1: Dashboard -->
+                <rect x="20" y="912" width="140" height="80" rx="8" fill="#102030" stroke="#14b8a6" stroke-width="1.2"/>
+                <text x="90" y="936" text-anchor="middle" fill="#14b8a6" font-size="9" font-weight="700" letter-spacing="0.5">ANALYTICS</text>
+                <text x="90" y="954" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Dashboard</text>
+                <text x="90" y="970" text-anchor="middle" fill="#94a3b8" font-size="9">Donut · Bar</text>
+                <text x="90" y="983" text-anchor="middle" fill="#94a3b8" font-size="9">Category split</text>
+
+                <!-- Output 2: Budget -->
+                <rect x="180" y="912" width="140" height="80" rx="8" fill="#102030" stroke="#14b8a6" stroke-width="1.2"/>
+                <text x="250" y="936" text-anchor="middle" fill="#14b8a6" font-size="9" font-weight="700" letter-spacing="0.5">BUDGET</text>
+                <text x="250" y="954" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">Goal Tracker</text>
+                <text x="250" y="970" text-anchor="middle" fill="#94a3b8" font-size="9">Per-category limits</text>
+                <text x="250" y="983" text-anchor="middle" fill="#94a3b8" font-size="9">Progress bars</text>
+
+                <!-- Output 3: Forecast -->
+                <rect x="320" y="912" width="140" height="80" rx="8" fill="#0a2010" stroke="#22c55e" stroke-width="1.2"/>
+                <text x="390" y="936" text-anchor="middle" fill="#22c55e" font-size="9" font-weight="700" letter-spacing="0.5">FORECAST</text>
+                <text x="390" y="954" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">WMA Model</text>
+                <text x="390" y="970" text-anchor="middle" fill="#94a3b8" font-size="9">Month-end projection</text>
+                <text x="390" y="983" text-anchor="middle" fill="#22c55e" font-size="9">🟢 🟡 🔴 Verdict</text>
+
+                <!-- Output 4: AI Coach -->
+                <rect x="460" y="912" width="140" height="80" rx="8" fill="#1a0a2e" stroke="#a855f7" stroke-width="1.2"/>
+                <text x="530" y="936" text-anchor="middle" fill="#a855f7" font-size="9" font-weight="700" letter-spacing="0.5">AI COACHING</text>
+                <text x="530" y="954" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">LLaMA 3.3</text>
+                <text x="530" y="970" text-anchor="middle" fill="#94a3b8" font-size="9">Context-augmented</text>
+                <text x="530" y="983" text-anchor="middle" fill="#94a3b8" font-size="9">5-card insights</text>
+
+                <!-- Label: STEP 6 -->
+                <text x="305" y="905" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="700" letter-spacing="1">STEP 6 · OUTPUT LAYER</text>
+            </svg>
+        </div>
+
+        <!-- Step legend below flowchart -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-10 border-t border-slate-800/50 pt-8">
+            <div class="meth-step" style="border-top-color:var(--teal2)">
+                <div class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:var(--teal2)">Step 1 · Parsing</div>
+                <div class="font-bold text-sm text-white mb-1">SMS Regex Parser</div>
+                <div class="text-xs text-slate-400">Extracts merchant, amount, date from 2 SBI UPI formats. MERCHANT_MAP + localStorage for instant categorization.</div>
+            </div>
+            <div class="meth-step" style="border-top-color:var(--gold)">
+                <div class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:var(--gold)">Step 1B · Vision</div>
+                <div class="font-bold text-sm text-white mb-1">Receipt OCR</div>
+                <div class="text-xs text-slate-400">LLaMA 4 Scout Vision extracts vendor, amount, date, category from uploaded receipt photos via drag-drop or camera.</div>
+            </div>
+            <div class="meth-step" style="border-top-color:var(--purple)">
+                <div class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:#a855f7">Step 3 · AI Classify</div>
+                <div class="font-bold text-sm text-white mb-1">Zero-Shot XAI</div>
+                <div class="text-xs text-slate-400">Unknown vendors → Groq LLaMA 3.3 zero-shot classification with confidence % + explainable reasoning shown to user.</div>
+            </div>
+            <div class="meth-step" style="border-top-color:var(--teal)">
+                <div class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:var(--teal2)">Step 5 · Storage</div>
+                <div class="font-bold text-sm text-white mb-1">Supabase + RLS</div>
+                <div class="text-xs text-slate-400">JWT Auth + Supabase Row-Level Security ensures each user sees only their own data. PostgreSQL via Supabase BaaS.</div>
+            </div>
+            <div class="meth-step" style="border-top-color:var(--green)">
+                <div class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:var(--green)">Step 6A · Forecast</div>
+                <div class="font-bold text-sm text-white mb-1">WMA Model</div>
+                <div class="text-xs text-slate-400">Weighted Moving Average algorithm projects month-end spend. Recent days weighted higher. 🟢/🟡/🔴 verdict displayed.</div>
+            </div>
+            <div class="meth-step" style="border-top-color:var(--purple)">
+                <div class="text-[10px] font-black uppercase tracking-widest mb-2" style="color:#a855f7">Step 6B · Coach</div>
+                <div class="font-bold text-sm text-white mb-1">AI Financial Coach</div>
+                <div class="text-xs text-slate-400">LLaMA 3.3 receives category-wise totals + transaction count to generate grounded, personalized 5-card financial insights.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 9 — REFERENCES
+══════════════════════════════════════════════════════════════════ -->
+<section id="references">
+    <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-teal-400 mb-4">References</p>
+    <h2 class="section-header mb-10">Academic Citations</h2>
+    <div class="space-y-3">
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[1]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Thakare, R. et al. (2023). "Expense Tracker Application using Naive Bayes." <em class="text-slate-300">IJRES</em>, vol. 10, no. 3, pp. 50–56.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[2]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Johri, E., Desai, P., Soni, P., Jain, H. & Sanganeria, N. (2023). "Expense Management System." <em class="text-slate-300">IEEE GCAT 2023</em>.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[3]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Singla, S., Kaur, A. et al. (2024). "Unveiling Financial Insights: The Daily Expense Tracker System Approach." <em class="text-slate-300">INNOCOMP 2024</em>.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[4]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Aishwarya, S. & Hemalatha, S. (2023). "Smart Expense Tracking System Using Machine Learning." <em class="text-slate-300">AI4IoT 2023</em>, pp. 634–639.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[5]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Bandara, B.D.N. & Nawinna, D. (2023). "WONGA: The Future of Personal Finance Management — A Machine Learning-Driven Approach." <em class="text-slate-300">ResearchGate</em>, May 2023.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[6]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">de Zarzà, I., de Curtò, J., Roig, G. & Calafate, C.T. (2024). "Optimized Financial Planning: Integrating LLM Recommendations." <em class="text-slate-300">AI (MDPI)</em>, vol. 5, no. 1, pp. 91–114.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[7]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Dev, H., Gupta, R., Dharmavaram, S. & Kumar, D. (2024). "From Cash to Cashless: UPI's Impact on Spending Behavior Among Indian Users." <em class="text-slate-300">CHI EA '24, ACM</em>.</p>
+        </div>
+        <div class="glass rounded-xl p-4 flex gap-4 items-start">
+            <span class="text-xs font-black font-mono flex-shrink-0 mt-0.5" style="color:var(--teal2)">[8]</span>
+            <p class="text-sm text-slate-400 leading-relaxed">Talasila, S.D. (2024). "AI-Driven Personal Finance Management: Revolutionizing Budgeting." <em class="text-slate-300">IRJET</em>, vol. 11, no. 7, pp. 397–403.</p>
+        </div>
+    </div>
+</section>
+
+<div class="teal-divider w-full"></div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SECTION 10 — TEAM
+══════════════════════════════════════════════════════════════════ -->
+<section id="team" class="text-center">
+    <p class="text-[10px] font-bold uppercase tracking-[0.5em] text-slate-500 mb-12">Academic Credits</p>
+    <div class="flex flex-wrap justify-center gap-8 mb-16">
+        <div class="glass rounded-3xl px-12 py-8 border-b-4" style="border-color:var(--teal)">
+            <p class="text-[9px] font-bold uppercase tracking-widest mb-3" style="color:var(--teal2)">Project Guide</p>
+            <p class="font-black text-xl text-white">Dr. Babita Tiwari</p>
+            <p class="text-xs text-slate-400 mt-1">Manipal University Jaipur</p>
+        </div>
+        <div class="glass rounded-3xl px-12 py-8 border-b-4 border-slate-700">
+            <p class="text-[9px] font-bold uppercase tracking-widest mb-3 text-slate-400">Student</p>
+            <p class="font-black text-xl text-white">Vaishnavi Kaushal</p>
+            <p class="text-xs text-slate-400 mt-1">23FE10CSE00480</p>
+            <p class="text-xs mt-1" style="color:var(--teal2)">B.Tech CSE · MUJ '27</p>
+        </div>
+    </div>
+
+    <!-- Live links -->
+    <div class="flex flex-wrap justify-center gap-4">
+        <a href="https://spendwise-woad.vercel.app" target="_blank" class="flex items-center gap-3 px-7 py-3 rounded-2xl font-bold text-sm text-white transition-all hover:opacity-80" style="background:var(--teal)">
+            <i class="fas fa-globe"></i> Live Demo
+        </a>
+        <a href="https://github.com/justcoding1908/Spendwise" target="_blank" class="flex items-center gap-3 px-7 py-3 rounded-2xl font-bold text-sm transition-all hover:opacity-80 glass border border-slate-700">
+            <i class="fab fa-github"></i> GitHub Repository
+        </a>
+    </div>
+</section>
+
+</main>
+
+<!-- ══ FOOTER ══════════════════════════════════════════════════════ -->
+<footer class="relative z-10 py-10 text-center border-t border-slate-900/80" style="background:rgba(2,11,20,0.7)">
+    <p class="text-slate-500 text-[10px] font-bold tracking-[0.3em] uppercase mb-1">Manipal University Jaipur</p>
+    <p class="text-slate-600 text-[9px] tracking-[0.2em] uppercase opacity-60">Department of Computer Science &amp; Engineering · PBL 2026</p>
+</footer>
+
+<script>
+// ── TIMER ──────────────────────────────────────────────────────────
+let sec = 0, timer = null;
+function startTimer() {
+    timer = setInterval(() => {
+        sec++;
+        const m = Math.floor(sec / 60), s = sec % 60;
+        document.getElementById('displayTime').innerText =
+            `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        const tc = document.getElementById('timerContainer');
+        const ic = document.getElementById('timerIcon');
+        if (sec >= 480 && sec < 600) {
+            tc.classList.add('timer-warning');
+            ic.className = 'fas fa-hourglass-half text-xl';
+        } else if (sec >= 600) {
+            clearInterval(timer);
+            tc.classList.remove('timer-warning');
+            tc.classList.add('timer-stop');
+            document.getElementById('displayTime').innerText = '10:00';
+            ic.className = 'fas fa-hourglass-end text-xl';
+        }
+    }, 1000);
+}
+
+// ── Scroll reveal ──────────────────────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) {
+            e.target.style.opacity = '1';
+            e.target.style.transform = 'translateY(0)';
+        }
+    });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('section').forEach(s => {
+    s.style.opacity = '0';
+    s.style.transform = 'translateY(24px)';
+    s.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+    observer.observe(s);
+});
+</script>
+</body>
+</html>
